@@ -1,11 +1,10 @@
 Rainbow
 
-Upload file manager
+Set of 'Colors' to get a 'good palette' to work.
 
-TO DO
+I will put here all Public and OpenSource code
+that I am using in other in my projects.
 
-  - All
-
-Wish List
-
-  - All
+- \Util\cDebug  Debug tool (first simple version ready)
+- \Util\cFiles  File management tool (working)
+- \Db\cPdo      PDO tool (working)

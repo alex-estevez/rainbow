@@ -1,21 +1,41 @@
 <?php
 /**
- * Rainbow Class File Uploader.
+ * Rainbow Utils.
  * File to test working.
  */
 
-namespace Proyect;
+define('BD_TYPE',     'mysql');
+define('DB_PREFIX',   '');
+define('BD_HOST',     'localhost');
+define('BD_NAME',     'dbname');
+define('BD_USER',     'user');
+define('BD_PASSW',    'pass');
+define('CACHE_QUERY', true);
+define('DEBUG',       1);
 
-define('DEBUG',1);
-include('classes/rainbow.php');
-include('classes/debug.php');
+// simple class autoloader only for test purposes.
+function __autoload($class_name) {
+  $class_parts = explode("\\",$class_name);
+  $class_name = end($class_parts);
+  $class_name = strtolower(substr($class_name,1));
+  $class_path = 'classes/'.$class_name.'.php';
+  if(file_exists($class_path)) include $class_path;
+}
 
-$oRainbow = \Rainbow\cRainbow::create();
 
-$oRainbow->addLimit('size',1024);
-$oRainbow->checkLimits();
+// Testing file manager
+$oFiles = \Util\cFiles::create();
+$oFiles->addLimit('size',1024);
+$oFiles->checkLimits();
 
-\Util\cDebug::add($oRainbow);
+// Testing Debug tools
+\Util\cDebug::add($oFiles);
+
+// Testing PDO Db access /require correct SQL data and access credentials
+$oDb = \Db\cPdo::create();
+$result = $oDb->dbSelect('SELECT * FROM your_table');
+
+\Util\cDebug::add($result);
 
 ?>
 <html>
@@ -37,7 +57,9 @@ $oRainbow->checkLimits();
     </form>
     <div>
       <h1>Debug Info</h1>
-      <?php \Util\cDebug::show(); ?>
+      <?php echo \Util\cDebug::show(); ?>
+      <h1>Debug Querys</h1>
+      <?php echo \Util\cDebug::showQuerys(); ?>
     </div>
   </body>
 </html>

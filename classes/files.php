@@ -1,8 +1,8 @@
 <?php
 
-namespace Rainbow;
+namespace Util;
 
-class cRainbow {
+class cFiles {
   
   private $num_files;
   private $limits;
