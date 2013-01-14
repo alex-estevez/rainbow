@@ -8,8 +8,8 @@ define('BD_TYPE',     'mysql');
 define('DB_PREFIX',   '');
 define('BD_HOST',     'localhost');
 define('BD_NAME',     'dbname');
-define('BD_USER',     'user');
-define('BD_PASSW',    'pass');
+define('BD_USER',     'dbuser');
+define('BD_PASSW',    'dbpass');
 define('CACHE_QUERY', true);
 define('DEBUG',       1);
 
@@ -22,7 +22,6 @@ function __autoload($class_name) {
   if(file_exists($class_path)) include $class_path;
 }
 
-
 // Testing file manager
 $oFiles = \Util\cFiles::create();
 $oFiles->addLimit('size',1024);
@@ -32,7 +31,7 @@ $oFiles->checkLimits();
 \Util\cDebug::add($oFiles);
 
 // Testing PDO Db access /require correct SQL data and access credentials
-$oDb = \Db\cPdo::create();
+$oDb = \Util\cPdo::create();
 $result = $oDb->dbSelect('SELECT * FROM your_table');
 
 \Util\cDebug::add($result);

@@ -1,35 +1,82 @@
 <?php
 
-namespace Db;
+namespace Util;
 
+/**
+ * Class that wraps the PDO PHP class
+ * Allows database querying throw PDO
+ * 
+ * Requires PHP 5.3  (for use of namespaces)
+ * Requires Rainbow \Util\cDebug (for debugging)
+ * 
+ * @author Alex Estevez
+ * @version 0.1
+ */
 class cPdo extends \PDO {
-  
+
+  /**
+   * Self Instance of this Object 
+   * @var Object $instance 
+   */
   static private $instance;
-	private $arrSqls      = array();
-	private $arrTypeData  = array();
-	private $arrTypeAssoc = array();
-	private $cacheQuery;
+         private $arrSqls      = array();
+         private $arrTypeData  = array();
+         private $arrTypeAssoc = array();
+         private $cacheQuery;
 	
 	const DATA       = 'data';
 	const ASSOC      = 'assoc';
 	const ALL_FIELDS = '*';
   
+  /**
+   * Constructor of the class.
+   * Is public by PDO requirements. But it's convenient do class instantation
+   * through create method.
+   * 
+   * @param string $db_lib Type of Database for DSN construction
+   * @param string $db_host Hostname for DSN construction
+   * @param string $db_name database name
+   * @param string $db_user user for the connection
+   * @param string $db_pass password of this user/connection
+   * @param array $db_options array of options to pass to the Database connection
+   */
   public function __construct($db_lib = BD_TYPE, $db_host = BD_HOST, $db_name = BD_NAME, $db_user = BD_USER, $db_pass = BD_PASSW, $db_options = array()) {
-    parent::__construct("$db_lib:host=$db_host;dbname=$db_name", $db_user, $db_pass, $db_options);
+    try {
+      parent::__construct("$db_lib:host=$db_host;dbname=$db_name", $db_user, $db_pass, $db_options);
+    } catch (\PDOException $e) {
+      \Util\cDebug::add('¡Error!: '.$e->getMessage()."<br/>");
+      echo \Util\cDebug::show();
+      die();
+    }  
     if(defined('CACHE_QUERY')) $this->cacheQuery = CACHE_QUERY;
-      else $this->cacheQuery = false;
+      else $this->cacheQuery = false;      
   }
-  
+
+  /**
+   * Return the object Instance, creating if not exists (Singleton)
+   * @return obj Instance
+   */
   public static function create() {
     if( self::$instance == null ) {
       self::$instance = new self();
     }
     return self::$instance;
   }
+  
+  /**
+   * Close the connection
+   * in PDO, the process is done just 'losing' the instance.
+   */
   public static function disconnect() {
     self::$instance = NULL;
   }
   
+  /**
+   * Execute Sql Query.
+   * First do prepare of it. Then executes.
+   * @param string The Sql sentence
+   * @return mixed The query result. (Depends on Query)
+   */
   public function dbExec($sql) {
     \Util\cDebug::prepareQuery();
 		$result = $this->prepare($sql);
@@ -37,8 +84,24 @@ class cPdo extends \PDO {
 		$result = $this->exec($sql);
 		return $result;
   }
-    
-  public function dbSelectPaged ($sql, $limit = 10, $pag = 1, $field = \Db\cPdo::ALL_FIELDS, $mode = \Db\cPdo::DATA) {
+  
+  /**
+   * Executes a SQL Query that return rows, Paging them
+   * @param string $sql    SQL Query string
+   * @param int    $limit  [Optional] Default 10. Sets the maximum number of of rows to retrieve
+   * @param int    $page   [Optional] Default 1. Sets the page to retrive. Pages calculated by $limit
+   * @param string $fields [Optional] Default '*' (All). Set the fields to be retrieved.
+   * @param const  $mode   [Optional] Default DATA.  Mode of retrieving. Could be [ \Util\cPdo::DATA | \Util\cPdo::ASSOC ]
+   * @return array (
+   *   array $Results the SQL retrieved rows array.
+   *   int $num_pag The number of pages
+   *   int $total Total of rows
+   *   int $start First element retrieved position
+   *   int $starting First element retrieved adjusted position
+   *   int $finishing Last element retrieved adjusted position
+   * )
+   */
+  public function dbSelectPaged ($sql, $limit = 10, $pag = 1, $field = \Util\cPdo::ALL_FIELDS, $mode = \Util\cPdo::DATA) {
     $total   = $this->dbCount($sql);
     $num_pag = ceil($total/$limit);
 		$start   = ($pag-1)* $limit;
@@ -61,14 +124,22 @@ class cPdo extends \PDO {
     $result = $this->dbSelect($sql, $field, $mode);
     return array($result, $num_pag, $total, $start, $starting, $finishing);
   }
-    
-  public function dbSelect($sql, $field = \Db\cPdo::ALL_FIELDS, $mode = \Db\cPdo::DATA) {
+
+  /**
+   * Executes a SQL Query that return rows.
+   *
+   * @param string $sql    SQL Query string
+   * @param string $fields [Optional] Default '*' (All). Set the fields to be retrieved.
+   * @param const  $mode   [Optional] Default DATA.  Mode of retrieving. Could be [ \Util\cPdo::DATA | \Util\cPdo::ASSOC ]
+   * @return array $Results the SQL retrieved rows array.
+   */
+  public function dbSelect($sql, $field = \Util\cPdo::ALL_FIELDS, $mode = \Util\cPdo::DATA) {
     $index = array_search($sql,$this->arrSqls);
     
     if($index !== FALSE AND $this->cacheQuery) {
-      if($mode==\Db\cPdo::DATA) {
+      if($mode==\Util\cPdo::DATA) {
         return $this->arrTypeData[$index];
-      } elseif($mode==\Db\cPdo::ASSOC) {
+      } elseif($mode==\Util\cPdo::ASSOC) {
         return 	$this->arrTypeAssoc[$index];
       }
     } else {
@@ -82,16 +153,16 @@ class cPdo extends \PDO {
     $data->execute();
     \Util\cDebug::queryPrepared($sql,$result);
     
-		if($mode==\Db\cPdo::DATA) {
+		if($mode==\Util\cPdo::DATA) {
 			$v = $data->fetch(\PDO::FETCH_ASSOC);
-			if($field==\Db\cPdo::ALL_FIELDS) {
+			if($field==\Util\cPdo::ALL_FIELDS) {
 				$result = $v;
 			} else {
 				$result = $v[$field];
 			}
 			$this->arrTypeData[$index] = $result;
-		} elseif($mode==\Db\cPdo::ASSOC) {
-		  if($field==\Db\cPdo::ALL_FIELDS) {
+		} elseif($mode==\Util\cPdo::ASSOC) {
+		  if($field==\Util\cPdo::ALL_FIELDS) {
 		    while($v = $data->fetch(\PDO::FETCH_ASSOC)) {
 					$result[] = $v;
 				}
@@ -106,6 +177,11 @@ class cPdo extends \PDO {
   	return $result;
 	}
 	
+  /**
+   * Return the number of rows returned by a SQL quey
+   * @param string $sql The SQL query
+   * @return int The row count.
+   */
   public function dbCount($sql) {
     $data = $this->prepare($sql);
     $data->execute();
