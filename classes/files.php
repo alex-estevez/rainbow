@@ -12,7 +12,7 @@ class cFiles {
   
   private function __construct() {
     $this->num_files = count($_FILES);
-    \Util\cDebug::add($_FILES);
+    //\Util\cDebug::add($_FILES);
     
   }
   
@@ -40,7 +40,7 @@ class cFiles {
         }
       }
     }
-    \Util\cDebug::add($files);
+    //\Util\cDebug::add($files);
   }
   
   private function checkLimitSize($file,$limit) {

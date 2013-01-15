@@ -22,38 +22,19 @@ function __autoload($class_name) {
   if(file_exists($class_path)) include $class_path;
 }
 
-// Testing file manager
-$oFiles = \Util\cFiles::create();
-$oFiles->addLimit('size',1024);
-$oFiles->checkLimits();
-
-// Testing Debug tools
-\Util\cDebug::add($oFiles);
-
 // Testing PDO Db access /require correct SQL data and access credentials
-$oDb = \Util\cPdo::create();
-$result = $oDb->dbSelect('SELECT * FROM your_table');
 
-\Util\cDebug::add($result);
+$result = \Util\cPdo::db()->dbSelect("SELECT CONCAT('Hello') AS Greetings, CONCAT('Bye') AS Regards");
+\Util\cDebug::add($result,'Results of first Select');
+$result = \Util\cPdo::db()->dbSelect('SELECT WITH ERRORS');
+\Util\cDebug::add($result,'Results of second Select');
 
 ?>
 <html>
   <head>
-    <title>Rainbow File Manager Test</title>
-    <style>
-      label { display: block; }
-    </style>
+    <title>Rainbow Testing</title>
   </head>
   <body>
-    <form action="index.php" method="POST" enctype="multipart/form-data">
-      <label>File to upload
-        <input type="file" name="file1" />
-      </label>
-      <label>File to upload
-        <input type="file" name="file2" />
-      </label>
-      <input type="submit" value="Upload" />
-    </form>
     <div>
       <h1>Debug Info</h1>
       <?php echo \Util\cDebug::show(); ?>
