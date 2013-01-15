@@ -10,7 +10,7 @@ namespace Util;
  * Requires Rainbow \Util\cDebug (for debugging)
  *
  * @author Alex Estevez
- * @version 0.1
+ * @version 0.9
  */
 class cPdo extends \PDO {
 
