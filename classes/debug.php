@@ -1,6 +1,6 @@
 <?php
 
-namespace Util;
+namespace Rainbow;
 
 /**
  * Class to do debbuging task.
@@ -106,14 +106,21 @@ class cDebug {
    * Add Debug information Entry.
    * @param mix $element Element to Debug
    * @param string $description [Optional] Descriptive text of the Debug.
+   * @param Boole $extra [Optional] Default true. Show extra info.
    */
-  static public function add($element,$description = '') {
+  static public function add($element = null,$description = '', $extra = true) {
     if (!isset(self::$instance)) self::create();
-      $debugInfo = debug_backtrace();
+      if($extra==true) { 
+        $debugInfo = debug_backtrace();
+        $debugLine = 'Line '.str_pad($debugInfo[0]['line'], 5, "0", STR_PAD_LEFT).': '.$debugInfo[0]['file'];
+      } else {
+        $debugLine = null;
+      }
+      if($element!=null) $element = print_r($element,true);
       self::$debugInfo[] = array(
          'desc' => $description
-        ,'data' => print_r($element,true)
-        ,'info' => 'Line '.str_pad($debugInfo[0]['line'], 5, "0", STR_PAD_LEFT).': '.$debugInfo[0]['file']
+        ,'data' => $element
+        ,'info' => $debugLine
       );
   }
 
@@ -168,8 +175,8 @@ class cDebug {
     foreach(self::$debugInfo as $item) {
       $content .= self::itemStart;
       if($item['desc']!='') $content .= '<b>'.$item['desc']."</b>\n";
-      $content .= '<i>'.$item['info']."</i>\n";
-      $content .= $item['data']."\n";
+      if($item['info']!=null)$content .= '<i>'.$item['info']."</i>\n";
+      if($item['data']!=null) $content .= $item['data']."\n";
       $content .= self::itemClose;
     }
     return '<pre>'.$content."</pre>\n";

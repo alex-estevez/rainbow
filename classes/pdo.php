@@ -1,13 +1,13 @@
 <?php
 
-namespace Util;
+namespace Rainbow;
 
 /**
  * Class that wraps the PDO PHP class
  * Allows database querying throw PDO
  *
  * Requires PHP 5.3  (for use of namespaces)
- * Requires Rainbow \Util\cDebug (for debugging)
+ * Requires Rainbow \Rainbow\cDebug (for debugging)
  *
  * @author Alex Estevez
  * @version 0.9
@@ -41,11 +41,12 @@ class cPdo extends \PDO {
    * @param array $db_options array of options to pass to the Database connection
    */
   public function __construct($db_lib = BD_TYPE, $db_host = BD_HOST, $db_name = BD_NAME, $db_user = BD_USER, $db_pass = BD_PASSW, $db_options = array()) {
+    if(empty($db_options)) $db_options = array(\PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8");
     try {
       parent::__construct("$db_lib:host=$db_host;dbname=$db_name", $db_user, $db_pass, $db_options);
     } catch (\PDOException $e) {
-      \Util\cDebug::add($e->getMessage(),'Error Connection to the Database');
-      echo \Util\cDebug::show();
+      \Rainbow\cDebug::add($e->getMessage(),'Error Connection to the Database');
+      echo \Rainbow\cDebug::show();
       die();
     }
     if(defined('CACHE_QUERY')) $this->cacheQuery = CACHE_QUERY;
@@ -58,9 +59,9 @@ class cPdo extends \PDO {
    *
    * <pre><code>
    * // Singleton example:
-   * $oDb = $oDb = \Util\cPdo::db();
+   * $oDb = $oDb = \Rainbow\cPdo::db();
    * // Fluent example
-   * $result = \Util\cPdo::db()->dbSelect('SELECT * FROM table');
+   * $result = \Rainbow\cPdo::db()->dbSelect('SELECT * FROM table');
    * </code></pre>
    * @return obj Instance
    */
@@ -86,10 +87,10 @@ class cPdo extends \PDO {
    * @return mixed The query result. (Depends on Query)
    */
   public function dbExec($sql) {
-    \Util\cDebug::startQuery();
+    \Rainbow\cDebug::startQuery();
 		$data = $this->prepare($sql);
 		$data->exec($sql);
-    \Util\cDebug::endQuery($sql,$data->errorCode());
+    \Rainbow\cDebug::endQuery($sql,$data->errorCode());
 		return $result;
   }
 
@@ -99,7 +100,7 @@ class cPdo extends \PDO {
    * @param int    $limit  [Optional] Default 10. Sets the maximum number of of rows to retrieve
    * @param int    $page   [Optional] Default 1. Sets the page to retrive. Pages calculated by $limit
    * @param string $fields [Optional] Default '*' (All). Set the fields to be retrieved.
-   * @param const  $mode   [Optional] Default DATA.  Mode of retrieving. Could be [ \Util\cPdo::DATA | \Util\cPdo::ASSOC ]
+   * @param const  $mode   [Optional] Default DATA.  Mode of retrieving. Could be [ \Rainbow\cPdo::DATA | \Rainbow\cPdo::ASSOC ]
    * @return array (
    *   array $Results the SQL retrieved rows array.
    *   int $num_pag The number of pages
@@ -109,7 +110,7 @@ class cPdo extends \PDO {
    *   int $finishing Last element retrieved adjusted position
    * )
    */
-  public function dbSelectPaged ($sql, $limit = 10, $pag = 1, $field = \Util\cPdo::ALL_FIELDS, $mode = \Util\cPdo::DATA) {
+  public function dbSelectPaged ($sql, $limit = 10, $pag = 1, $field = \Rainbow\cPdo::ALL_FIELDS, $mode = \Rainbow\cPdo::DATA) {
     $total   = $this->dbCount($sql);
     $num_pag = ceil($total/$limit);
 		$start   = ($pag-1)* $limit;
@@ -138,16 +139,16 @@ class cPdo extends \PDO {
    *
    * @param string $sql    SQL Query string
    * @param string $fields [Optional] Default '*' (All). Set the fields to be retrieved.
-   * @param const  $mode   [Optional] Default DATA.  Mode of retrieving. Could be [ \Util\cPdo::DATA | \Util\cPdo::ASSOC ]
+   * @param const  $mode   [Optional] Default DATA.  Mode of retrieving. Could be [ \Rainbow\cPdo::DATA | \Rainbow\cPdo::ASSOC ]
    * @return array $Results the SQL retrieved rows array.
    */
-  public function dbSelect($sql, $field = \Util\cPdo::ALL_FIELDS, $mode = \Util\cPdo::DATA) {
+  public function dbSelect($sql, $field = \Rainbow\cPdo::ALL_FIELDS, $mode = \Rainbow\cPdo::DATA) {
     $index = array_search($sql,$this->arrSqls);
 
     if($index !== FALSE AND $this->cacheQuery) {
-      if($mode==\Util\cPdo::DATA) {
+      if($mode==\Rainbow\cPdo::DATA) {
         return $this->arrTypeData[$index];
-      } elseif($mode==\Util\cPdo::ASSOC) {
+      } elseif($mode==\Rainbow\cPdo::ASSOC) {
         return 	$this->arrTypeAssoc[$index];
       }
     } else {
@@ -156,21 +157,21 @@ class cPdo extends \PDO {
 
     $result = null;
 
-    \Util\cDebug::startQuery();
+    \Rainbow\cDebug::startQuery();
     $data = $this->prepare($sql);
     $data->execute();
-    \Util\cDebug::endQuery($sql,$data->errorCode());
+    \Rainbow\cDebug::endQuery($sql,$data->errorCode());
 
-		if($mode==\Util\cPdo::DATA) {
+		if($mode==\Rainbow\cPdo::DATA) {
 			$v = $data->fetch(\PDO::FETCH_ASSOC);
-			if($field==\Util\cPdo::ALL_FIELDS) {
+			if($field==\Rainbow\cPdo::ALL_FIELDS) {
 				$result = $v;
 			} else {
 				$result = $v[$field];
 			}
 			$this->arrTypeData[$index] = $result;
-		} elseif($mode==\Util\cPdo::ASSOC) {
-		  if($field==\Util\cPdo::ALL_FIELDS) {
+		} elseif($mode==\Rainbow\cPdo::ASSOC) {
+		  if($field==\Rainbow\cPdo::ALL_FIELDS) {
 		    while($v = $data->fetch(\PDO::FETCH_ASSOC)) {
 					$result[] = $v;
 				}

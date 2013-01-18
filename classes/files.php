@@ -1,6 +1,6 @@
 <?php
 
-namespace Util;
+namespace Rainbow;
 
 class cFiles {
   
@@ -12,7 +12,7 @@ class cFiles {
   
   private function __construct() {
     $this->num_files = count($_FILES);
-    //\Util\cDebug::add($_FILES);
+    //\Rainbow\cDebug::add($_FILES);
     
   }
   
@@ -40,7 +40,7 @@ class cFiles {
         }
       }
     }
-    //\Util\cDebug::add($files);
+    //\Rainbow\cDebug::add($files);
   }
   
   private function checkLimitSize($file,$limit) {

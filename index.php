@@ -24,10 +24,10 @@ function __autoload($class_name) {
 
 // Testing PDO Db access /require correct SQL data and access credentials
 
-$result = \Util\cPdo::db()->dbSelect("SELECT CONCAT('Hello') AS Greetings, CONCAT('Bye') AS Regards");
-\Util\cDebug::add($result,'Results of first Select');
-$result = \Util\cPdo::db()->dbSelect('SELECT WITH ERRORS');
-\Util\cDebug::add($result,'Results of second Select');
+$result = \Rainbow\cPdo::db()->dbSelect("SELECT CONCAT('Hello') AS Greetings, CONCAT('Bye') AS Regards");
+\Rainbow\cDebug::add($result,'Results of first Select');
+$result = \Rainbow\cPdo::db()->dbSelect('SELECT WITH ERRORS');
+\Rainbow\cDebug::add($result,'Results of second Select');
 
 ?>
 <html>
@@ -37,9 +37,9 @@ $result = \Util\cPdo::db()->dbSelect('SELECT WITH ERRORS');
   <body>
     <div>
       <h1>Debug Info</h1>
-      <?php echo \Util\cDebug::show(); ?>
+      <?php echo \Rainbow\cDebug::show(); ?>
       <h1>Debug Querys</h1>
-      <?php echo \Util\cDebug::showQuerys(); ?>
+      <?php echo \Rainbow\cDebug::showQuerys(); ?>
     </div>
   </body>
-</html>
+</html>    
